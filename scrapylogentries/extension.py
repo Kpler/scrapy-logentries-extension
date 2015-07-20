@@ -17,7 +17,7 @@ class LogentriesExtension(object):
     def from_crawler(cls, crawler):
         # first check if the extension should be enabled and raise
         # NotConfigured otherwise
-        token = crawler.settings.getstring('LOGENTRIES_TOKEN')
+        token = crawler.settings.get('LOGENTRIES_TOKEN')
         if not token:
             raise NotConfigured
 
