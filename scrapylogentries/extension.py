@@ -10,7 +10,7 @@ class LogentriesExtension(object):
         self.token = token
         from logentries import LogentriesHandler
         import logging
-
+        logging.info('Logentries activated with toker {}'.format(token))
         logging.root.addHandler(LogentriesHandler(token))
 
     @classmethod
