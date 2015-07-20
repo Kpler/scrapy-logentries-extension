@@ -17,7 +17,7 @@ requires = [
 
 setup(
     name='scrapylogentries',
-    version=history.__version__,
+    version=scrapylogentries.__version__,
     description='Scrapy extension to enable logging to Logentries.',
     long_description=open('README.md').read(),
     author='Jean Maynier',
