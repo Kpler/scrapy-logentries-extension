@@ -1,7 +1,7 @@
 import logging, os
 from scrapy import signals
 from scrapy.exceptions import NotConfigured
-from logentriesadapter import LogentriesAdapter
+from logentriesadapter import LogentriesAdapter, ScrapingHubFilter
 logger = logging.getLogger(__name__)
 
 class LogentriesExtension(object):
@@ -10,9 +10,33 @@ class LogentriesExtension(object):
         self.token = token
         from logentries import LogentriesHandler
         import logging
-        logging.info('Logentries activated with toker {}'.format(token))
-        logging.root.addHandler(LogentriesHandler(token))
+        root = logging.getLogger()
 
+        handler = LogentriesHandler(token)
+
+        spider_id = os.environ.get('SCRAPY_SPIDER_ID')
+        project_id = os.environ.get('SCRAPY_PROJECT_ID')
+        job_id = os.environ.get('SCRAPY_JOB_ID')
+
+        formatted = False
+        if job_id is not None:
+            formatted = True
+            filter = ScrapingHubFilter({
+                        'project_id': project_id,
+                       'spider_id': spider_id,
+                       'job_id': job_id,
+                       })
+            format = "%(name)s - %(levelname)s - [project_id=%(project_id)s spider_id=%(spider_id)s job_id=%(job_id)s] %(message)s"
+            formatter = logging.Formatter(format)
+
+            handler.addFilter(filter)
+            handler.setFormatter(formatter)
+
+        root.addHandler(handler)
+        if formatted:
+            logger.info('Logentries activated with token {} and custom SH format'.format(token))
+        else:
+            logger.info('Logentries activated with token {} and no custom SH format'.format(token))
 
     @classmethod
     def from_crawler(cls, crawler):
@@ -26,18 +50,6 @@ class LogentriesExtension(object):
         # instantiate the extension object
         ext = cls(token)
 
-        spider_id =  os.environ.get('SPIDER_ID')
-        project_id=  os.environ.get('SPIDER_ID')
-        job_id=  os.environ.get('JOB_ID')
-
-        if job_id is not None:
-            logging.logger = LogentriesAdapter(
-                logger=logging.getLogger(),
-                extra={'project_id': project_id,
-                       'spider_id': spider_id,
-                       'job_id': job_id,
-                       }
-            )
 
         # return the extension object
         return ext
