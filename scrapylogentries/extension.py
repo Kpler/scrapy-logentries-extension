@@ -1,4 +1,4 @@
-import logging
+import logging, os
 from scrapy import signals
 from scrapy.exceptions import NotConfigured
 from logentriesadapter import LogentriesAdapter
@@ -26,19 +26,20 @@ class LogentriesExtension(object):
         # instantiate the extension object
         ext = cls(token)
 
-        crawler.signals.connect(ext.spider_opened, signal=signals.spider_opened)
+        spider_id =  os.environ.get('SPIDER_ID')
+        project_id=  os.environ.get('SPIDER_ID')
+        job_id=  os.environ.get('JOB_ID')
 
+        if job_id is not None:
+            logging.logger = LogentriesAdapter(
+                logger=logging.getLogger(),
+                extra={'project_id': project_id,
+                       'spider_id': spider_id,
+                       'job_id': job_id,
+                       }
+            )
 
         # return the extension object
         return ext
 
-    def spider_opened(self, spider):
-        # Replace spider logger by LoggerAdapter giving more context if scrapy-job-parameter-extension is activated on Scrapinghub
-        if spider.spider_id is not None:
-            spider.logger = LogentriesAdapter(
-                logger=spider.logger,
-                extra={'spider_name': spider.name,
-                       'spider_id': spider.spider_id,
-                       'job_id': spider.job_id,
-                       }
-            )
+
