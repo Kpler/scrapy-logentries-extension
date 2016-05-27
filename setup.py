@@ -27,7 +27,7 @@ setup(
     install_requires=requires,
     license=open('LICENSE').read(),
     classifiers=(
-        'Development Status :: 4 - Beta'
+        'Development Status :: 4 - Beta',
         'Intended Audience :: Developers',
         'Natural Language :: English',
         'License :: OSI Approved :: MIT License',
