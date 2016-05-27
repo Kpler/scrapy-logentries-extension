@@ -1,2 +1,6 @@
 .idea/
+.coverage
 *.iml
+*.pyc
+.*.swp
+htmlcov/
