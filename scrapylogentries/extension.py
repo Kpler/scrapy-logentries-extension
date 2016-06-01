@@ -1,18 +1,21 @@
-import logging, os
+import logging
+import os
+
 from scrapy import signals
 from scrapy.exceptions import NotConfigured
+from logentries import LogentriesHandler
 from logentriesadapter import LogentriesAdapter, ScrapingHubFilter
+
 logger = logging.getLogger(__name__)
+
 
 class LogentriesExtension(object):
 
     def __init__(self, token):
         self.token = token
-        from logentries import LogentriesHandler
-        import logging
         root = logging.getLogger()
 
-        handler = LogentriesHandler(token)
+        self.handler = LogentriesHandler(token)
 
         spider_id = os.environ.get('SCRAPY_SPIDER_ID')
         project_id = os.environ.get('SCRAPY_PROJECT_ID')
@@ -29,10 +32,13 @@ class LogentriesExtension(object):
             format = "%(name)s - %(levelname)s - [project_id=%(project_id)s spider_id=%(spider_id)s job_id=%(job_id)s] %(message)s"
             formatter = logging.Formatter(format)
 
-            handler.addFilter(filter)
-            handler.setFormatter(formatter)
+            self.handler.addFilter(filter)
+            self.handler.setFormatter(formatter)
 
-        root.addHandler(handler)
+        root.addHandler(self.handler)
+
+        # NCA: not sure we want sensitive information like the token in the logs
+        #      Maybe use debug log level instead 
         if formatted:
             logger.info('Logentries activated with token {} and custom SH format'.format(token))
         else:
@@ -55,3 +61,4 @@ class LogentriesExtension(object):
         return ext
 
 
+# vim: syntax=python:sws=4:sw=4:et:
